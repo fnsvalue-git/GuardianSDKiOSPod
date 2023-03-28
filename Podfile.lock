@@ -1,19 +1,20 @@
 PODS:
   - Alamofire (4.9.1)
-  - CryptoSwift (1.7.0)
+  - CryptoSwift (1.3.2)
   - DeviceKit (5.0.0)
   - SocketRocket (0.6.0)
   - StompClientLib (1.4.1):
     - SocketRocket
-  - SwiftOTP (3.0.0)
+  - SwiftOTP (2.0.2):
+    - CryptoSwift (>= 1.0.0)
   - SwiftyJSON (5.0.1)
 
 DEPENDENCIES:
   - Alamofire (~> 4.4)
-  - CryptoSwift
+  - CryptoSwift (= 1.3.2)
   - DeviceKit
   - StompClientLib
-  - SwiftOTP
+  - SwiftOTP (= 2.0.2)
   - SwiftyJSON
 
 SPEC REPOS:
@@ -28,13 +29,13 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  CryptoSwift: e71dbe5bbb7a945e365d4b9034dbccf28d033a8f
+  CryptoSwift: 093499be1a94b0cae36e6c26b70870668cb56060
   DeviceKit: 0fd016a2cb67aca17c33dc23171cac270131eb88
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   StompClientLib: ac40390e9660c574675f1c933bec81c8e2811a4f
-  SwiftOTP: ec3848f12a4541f29d96f6a0fe63dcbb8448d96f
+  SwiftOTP: 572fb5601add61e93534cf6644ef236d65b4aae8
   SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
 
-PODFILE CHECKSUM: 2b838635b2ee2be9dafc4adb21e1f0e321d0ee2a
+PODFILE CHECKSUM: ca75c4fdd12f2129c96520881490ac6da20cc807
 
 COCOAPODS: 1.12.0

@@ -7,11 +7,11 @@ target 'GuardianSDKiOS' do
 
   # Pods for GuardianSDKiOS
   pod 'Alamofire', '~> 4.4'
-  pod 'CryptoSwift'
+  pod 'CryptoSwift', '1.3.2'
   pod 'SwiftyJSON'
   pod 'StompClientLib'
   pod 'DeviceKit'
-  pod 'SwiftOTP'
+  pod 'SwiftOTP', '2.0.2'
 
 
 end
