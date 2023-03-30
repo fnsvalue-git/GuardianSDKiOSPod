@@ -158,7 +158,7 @@ public class LocalizationMessage {
     ]
     
     public func getLocalization(code : Int) -> String? {
-        let rtCode : Int = code as? Int ?? 0
+        let rtCode : Int = code ?? 0
         if isLang == isLang, !isLang.isEmpty {
             let lang = getLang()
             switch lang {

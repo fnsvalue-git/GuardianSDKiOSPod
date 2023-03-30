@@ -103,8 +103,8 @@ public enum PushTarget : String {
 }
 
 //MARK: - NotipicationId
-public enum NotipicationId : String {
-    case NOTI_ID_AUTH = "GUARDIAN_AHTH"
+public enum NotificationId : String {
+    case NOTI_ID_AUTH = "GUARDIAN_AUTH"
     case NOTI_ID_SUCCESS = "GUARDIAN_SUCCESS"
     case NOTI_ID_FAIL = "GUARDIAN_FAIL"
     case NOTI_ID_CANCEL = "GUARDIAN_CANCEL"
@@ -173,14 +173,14 @@ public enum PushState {
 }
 
 //MARK: - 인증 결과 전달을 위한 delegate
-public protocol AuthCallBack: class {
+public protocol AuthCallBack: AnyObject {
     func onFailed(errorCode: Int,errorMsg: String)
     func onSuccess(channelKey: String)
     func onCancel()
 }
 
 //MARK: - unwind 를 위한 delegate
-public protocol UnwindCallBack: class {
+public protocol UnwindCallBack: AnyObject {
     func onBack()
 }
 
@@ -204,7 +204,7 @@ func getUUid() -> String {
 }
 
 func getPackageName() -> String {
-    let packageName = Bundle.main.bundleIdentifier as? String ?? "com.fnsvalue.GuardianCCS"
+    let packageName = Bundle.main.bundleIdentifier ?? "com.fnsvalue.GuardianCCS"
     
     return packageName
 }
@@ -223,7 +223,7 @@ func getAppVersion() -> String {
     return appVersion!
 }
 
-public protocol AuthObserver: class {
+public protocol AuthObserver: AnyObject {
     func onAuthentication(status : String)
 }
 
@@ -391,12 +391,11 @@ public class GuardianService{
                 print("")
             }
         }
-        
     }
     
     //MARK: - requestMember
     public func requestMember(onSuccess: @escaping(RtCode, String, [String:String])-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "device/check"
+        let apiUrl = "/device/check"
         var params = getCommonParam()
         params["deviceId"] = getUUid()
         
@@ -404,7 +403,8 @@ public class GuardianService{
         self.callHttpMethod(params: params, api: apiUrl) { (data: JSON) in
             let rtCode = data["rtCode"].intValue
             let rtMsg = data["rtMsg"].string ?? ""
-            guard let authData = data["data"] as? JSON else {
+            let authData = data["data"]
+            guard authData.exists() else {
                 onFailed(RtCode.API_ERROR, rtMsg)
                 return
             }
@@ -413,6 +413,7 @@ public class GuardianService{
             
             if (rtCode == RtCode.AUTH_SUCCESS.rawValue) {
                 print("AuthData from \(apiUrl) : \(authData)")
+                dic["uptDt"] = authData["uptDt"].string ?? ""
                 dic["userKey"] = authData["userKey"].string ?? ""
                 dic["name"] = authData["name"].string ?? ""
                 dic["email"] = authData["email"].string ?? ""
@@ -421,7 +422,6 @@ public class GuardianService{
                 
                 onSuccess(RtCode.AUTH_SUCCESS, rtMsg, dic)
             } else if (rtCode == RtCode.AUTH_MEMBER_STATUS_WITHDRAW.rawValue) {
-                // print("in AUTH_MEMBER_STATUS_WITHDRAW")
                 dic["userKey"] = authData["userKey"].string ?? ""
                 dic["uptDt"] = authData["uptDt"].string ?? ""
                 onSuccess(RtCode.AUTH_MEMBER_STATUS_WITHDRAW, rtMsg, dic)
@@ -434,7 +434,7 @@ public class GuardianService{
     }
     
     public func requestClients(onSuccess: @escaping(RtCode, String, Array<[String:String]>)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "clients"
+        let apiUrl = "/clients"
         var params = getCommonParam()
         params["deviceId"] = getUUid()
         
@@ -462,7 +462,7 @@ public class GuardianService{
     }
     
     public func requestTokenUpdate(token : String, onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "me/token"
+        let apiUrl = "/me/token"
         
         var params = getCommonParam()
         params["deviceId"] = getUUid()
@@ -490,7 +490,7 @@ public class GuardianService{
     ///   - onProcess: Report every single process such as `Start Authentication`, `Create Channel`, `Node Verification`...
     ///   - onFailed: When the authentication is failed
     public func requestAuthRequest(onSuccess: @escaping(RtCode, String, Int, String, String, String)-> Void, onProcess: @escaping(String) -> Void,  onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth/nodes"
+        let apiUrl = "/auth/nodes"
         
         let enCodeCK = encryptAES256(value: self.channelKey, seckey: self.channelKey)
         let enCodeBK = encryptAES256(value: self.blockKey, seckey: self.channelKey)
@@ -521,8 +521,6 @@ public class GuardianService{
                 print("stompwebsocket connect")
                 StompSocketService.sharedInstance.subscribe(authProcessCallback: {(status : String?) -> Void in
                     print("stompwebsocket subscribe => \(status!)")
-                    
-                    //                    self.notifyAuthStatus(status: status!)
                     switch status! {
                     case AuthStatus.COMPLETE_VERIFICATION_OF_NODES.rawValue:
                         self._authRequestSuccess(RtCode.AUTH_SUCCESS, status!, self.authType, self.connectIp, self.userKey, self.clientKey)
@@ -569,9 +567,9 @@ public class GuardianService{
         self.callHttpMethod(params: params, api: apiUrl, method: .post) { (data: JSON) in
             let rtCode = data["rtCode"].intValue
             let rtMsg = data["rtMsg"].string ?? ""
-            
+            let authData = data["data"]
             if (rtCode == RtCode.AUTH_SUCCESS.rawValue){
-                guard let authData = data["data"] as? JSON else {
+                guard authData.exists() else {
                     onFailed(RtCode.API_ERROR, rtMsg)
                     return
                 }
@@ -607,8 +605,7 @@ public class GuardianService{
     
     //MARK: - requestAuthResult
     public func requestAuthResult(isSecondaryCertification : Bool, onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth/complete"
-        
+        let apiUrl = "/auth/complete"
         
         var params = Dictionary<String, Any>()
         
@@ -647,7 +644,7 @@ public class GuardianService{
     ///   - onSuccess: Recieve rtCode and Token
     ///   - onFailed: Error rtCode and Error Message
     public func getAuthResultToken(onSuccess: @escaping(RtCode, [String:Any])-> Void, onFailed: @escaping(RtCode, String)-> Void){
-        let apiUrl = "auth"
+        let apiUrl = "/auth"
         
         var params = Dictionary<String,String>()
         params["deviceId"] = getUUid()
@@ -664,7 +661,7 @@ public class GuardianService{
     }
     
     public func requestAuthCancel(onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth"
+        let apiUrl = "/auth"
         
         var params = getCommonParam()
         params["deviceId"] = getUUid()
@@ -699,7 +696,7 @@ public class GuardianService{
         
         DispatchQueue.main.async {
             DeviceInfoService().getDeviceInfo{ (data:Dictionary<String, Any>) in
-                let apiUrl = "users"
+                let apiUrl = "/users"
                 
                 var params = data
                 
@@ -753,11 +750,9 @@ public class GuardianService{
         DispatchQueue.main.async {
             DeviceInfoService().getDeviceInfo{ (data:Dictionary<String, Any>) in
                 let userKey = memberObject["userKey"] as? String ?? ""
-                let apiUrl = "users/\(userKey)/device"
+                let apiUrl = "/users/\(userKey)/device"
                 
                 var params = data
-                
-                
                 
                 let commonParam = self.getCommonParam()
                 for key in commonParam.keys {
@@ -794,6 +789,7 @@ public class GuardianService{
                     }
                 } errorCallBack: { (errorCode, errorMsg) in
                     onFailed(RtCode.API_ERROR, errorMsg)
+                    print("register errorCode is \(errorCode) and errorMessage is \(errorMsg)")
                 }
             }
         }
@@ -809,7 +805,7 @@ public class GuardianService{
         DispatchQueue.main.async {
             DeviceInfoService().getDeviceInfo{ (data:Dictionary<String, Any>) in
                 let userKey = memberObject["userKey"] as? String ?? ""
-                let apiUrl = "users/\(userKey)/cancel"
+                let apiUrl = "/users/\(userKey)/cancel"
                 
                 var params = data
                 
@@ -847,15 +843,15 @@ public class GuardianService{
     }
     
     public func requestAuthSms(phoneNum : String, onSuccess: @escaping(RtCode, String, Int)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "sms"
+        let apiUrl = "/sms"
         var params = getCommonParam()
         params["phoneNum"] = phoneNum
         
         self.callHttpMethod(params: params, api: apiUrl, method: .post) { (data: JSON) in
             let rtCode = data["rtCode"].intValue
             let rtMsg = data["rtMsg"].string ?? ""
-            
-            guard let authData = data["data"] as? JSON else {
+            let authData = data["data"]
+            guard authData.exists() else {
                 onFailed(RtCode.API_ERROR, rtMsg)
                 return
             }
@@ -874,7 +870,7 @@ public class GuardianService{
     
     public func verifySms(phoneNum : String, authNum: String, seq: String,
                           onSuccess: @escaping(RtCode, String, Bool)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "sms/verify"
+        let apiUrl = "/sms/verify"
         var params = getCommonParam()
         params["phoneNum"] = phoneNum
         params["authNum"] = authNum
@@ -883,8 +879,9 @@ public class GuardianService{
         self.callHttpMethod(params: params, api: apiUrl, method: .post) { (data: JSON) in
             let rtCode = data["rtCode"].intValue
             let rtMsg = data["rtMsg"].string ?? ""
+            let verifyData = data["data"]
             
-            guard let verifyData = data["data"] as? JSON else {
+            guard verifyData.exists() else {
                 onFailed(RtCode.API_ERROR, rtMsg)
                 return
             }
@@ -902,7 +899,7 @@ public class GuardianService{
     }
     
     public func requestUserCheck(userKey: String, onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "me/\(self.clientKey)/member/\(userKey)/check"
+        let apiUrl = "/me/\(self.clientKey)/member/\(userKey)/check"
         let params = getCommonParam()
         
         self.callHttpMethod(params: params, api: apiUrl) { (data: JSON) in
@@ -920,7 +917,7 @@ public class GuardianService{
     }
     
     public func requestVerifyIcon(icons: String, onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth/verify/icon"
+        let apiUrl = "/auth/verify/icon"
         
         var params = getCommonParam()
         params["deviceId"] = getUUid()
@@ -941,7 +938,7 @@ public class GuardianService{
     }
     
     public func requestFingerFail(onSuccess: @escaping(RtCode, String)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth/verify/finger/fail"
+        let apiUrl = "/auth/verify/finger/fail"
         
         var params = getCommonParam()
         params["deviceId"] = getUUid()
@@ -961,7 +958,7 @@ public class GuardianService{
     }
     
     public func isAuthExist(userKey: String, onSuccess: @escaping(RtCode, String, [String:Any])-> Void, onFailed: @escaping(RtCode, String)-> Void) {
-        let apiUrl = "auth/exist"
+        let apiUrl = "/auth/exist"
         
         var params = getCommonParam()
         params["deviceId"] = getUUid()
@@ -970,15 +967,16 @@ public class GuardianService{
         self.callHttpMethod(params: params, api: apiUrl) { (data: JSON) in
             let rtCode = data["rtCode"].intValue
             let rtMsg = data["rtMsg"].string ?? ""
+            let authData = data["data"]
             
             if (rtCode == RtCode.AUTH_SUCCESS.rawValue){
-                guard let authData = data["data"] as? JSON else {
+                guard authData.exists() else {
                     onFailed(RtCode.API_ERROR, rtMsg)
                     return
                 }
                 
                 var resultData = [String:Any]()
-                resultData["isExist"] = authData["isExist"].boolValue ?? false
+                resultData["isExist"] = authData["isExist"].boolValue
                 resultData["clientKey"] = authData["clientKey"].string ?? ""
                 resultData["siteURL"] = authData["siteURL"].string ?? ""
                 resultData["timeout"] = authData["timeout"].string ?? ""
@@ -993,7 +991,6 @@ public class GuardianService{
         }
     }
     
-    //MARK: - isDuplcatedEmailOrPhoneNumber
     /// To check if the user has input an existing email or phone number
     /// - Parameters:
     ///   - verifyType: is a `String`, which has 2 cases. `CMMDUP001` for email and `CMMDUP002` for sms/phone
@@ -1014,7 +1011,6 @@ public class GuardianService{
             }
         }
 
-    //MARK: - isDuplicateUserKey
     /// To check if the user has input an existing `userKey`
     /// - Parameters:
     ///   - userKey: FNSV
@@ -1032,7 +1028,6 @@ public class GuardianService{
             onFailed(RtCode.API_ERROR.rawValue, errorMsg)
             }
         }
-    
     
     //MARK: - callHttpMethod
     /// Creates a `DataRequest` using the default `SessionManager` to retrieve the contents of the specified `url`,
@@ -1057,63 +1052,94 @@ public class GuardianService{
         print("method => \(method)")
         print("encodingMethod => \(encodingMethod)")
         
-        Alamofire.request(url, method: method, parameters: params, encoding: encodingMethod).responseJSON { response in
-            guard response.result.isSuccess else {
-                var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
-                var statusMessage : String
+        //AF.request(url, method: method, parameters: params, encoding: encodingMethod).responseJSON { (response) in
+        AF.request(url, method: method, parameters: params, encoding: encodingMethod).responseDecodable { (response : DataResponse<JSON, AFError>) in
+        switch response.result {
+            case .failure(_):
+            var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
+            var statusMessage : String
+            
+                if let error = response.error {
+                statusCode = error._code // statusCode Private
                 
-                if let error = response.result.error as? AFError {
-                    statusCode = error._code // statusCode Private
-                    
-                    switch error {
-                    case .invalidURL(let url):
-                        statusMessage = "Invalid URL, url: \(url)"
-                    case .parameterEncodingFailed(let reason):
-                        statusMessage = "Parameter encoding failed, reason: \(reason)"
-                    case .multipartEncodingFailed(let reason):
-                        statusMessage = "Multipart encoding failed, reason: \(reason)"
-                    case .responseValidationFailed(let reason):
-                        statusMessage = "Response validation failed, reason: \(reason)"
-                        //                        statusMessage = "Failure Reason"
-                        switch reason {
-                        case .dataFileNil, .dataFileReadFailed:
-                            statusMessage = "Downloaded file could not be read"
-                        case .missingContentType(let acceptableContentTypes):
-                            statusMessage = "Content Type Missing: \(acceptableContentTypes)"
-                        case .unacceptableContentType(let acceptableContentTypes, let responseContentType):
-                            statusMessage = "Response content type: \(responseContentType) was unacceptable: \(acceptableContentTypes)"
-                        case .unacceptableStatusCode(let code):
-                            statusMessage = "Response status code was unacceptable: \(code)"
-                            statusCode = code
-                        }
+                switch error {
+                case .invalidURL(let url):
+                    statusMessage = "Invalid URL, url: \(url)"
+                case .parameterEncodingFailed(let reason):
+                    statusMessage = "Parameter encoding failed, reason: \(reason)"
+                case .multipartEncodingFailed(let reason):
+                    statusMessage = "Multipart encoding failed, reason: \(reason)"
+                case .responseValidationFailed(let reason):
+                    statusMessage = "Response validation failed, reason: \(reason)"
+                    //                        statusMessage = "Failure Reason"
+                    switch reason {
+                    case .dataFileNil, .dataFileReadFailed:
+                        statusMessage = "Downloaded file could not be read"
+                    case .missingContentType(let acceptableContentTypes):
+                        statusMessage = "Content Type Missing: \(acceptableContentTypes)"
+                    case .unacceptableContentType(let acceptableContentTypes, let responseContentType):
+                        statusMessage = "Response content type: \(responseContentType) was unacceptable: \(acceptableContentTypes)"
+                    case .unacceptableStatusCode(let code):
+                        statusMessage = "Response status code was unacceptable: \(code)"
+                        statusCode = code
+                    case .customValidationFailed(error: let error):
+                        statusMessage = "Custom Validation failed :\(error)"
+                    }
                     case .responseSerializationFailed(let reason):
                         statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
                         statusMessage = "Failure Reason"
-                    // statusCode = 3840 ???? maybe..
-                    }
-                    statusMessage = "Underlying error"
-                } else if let error = response.result.error as? URLError {
-                    statusMessage = "URLError occurred, error: \(error)"
                     
-                } else {
-                    statusMessage = "Unknown error"
+                case .createUploadableFailed(error: _):
+                    print("create Uploadable Failed")
+                case .createURLRequestFailed(error: _):
+                    print("create URLRequest Failed")
+                case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                    print("downloaded FileMove Failed")
+                case .explicitlyCancelled:
+                    print("explicitly Cancelled")
+                case .parameterEncoderFailed(reason: _):
+                    print("parameter Encoder Failed")
+                case .requestAdaptationFailed(error: _):
+                    print("request Adaption Failed")
+                case .requestRetryFailed(retryError: _, originalError: _):
+                    print("request Retry Failed")
+                case .serverTrustEvaluationFailed(reason: _):
+                    print("server TrustEvaluation failed")
+                case .sessionDeinitialized:
+                    print("session Deinitialized")
+                case .sessionInvalidated(error: _):
+                    print("session Invalidated")
+                case .sessionTaskFailed(error: _):
+                    print("session Task Failed")
+                case .urlRequestValidationFailed(reason: _):
+                    print("urlRequest Validation Failed")
+
                 }
-                
-                errorCallBack(statusCode, statusMessage)
-                return
+                statusMessage = "Underlying error"
+            } else if let error = response.error{
+                statusMessage = "URLError occurred, error: \(error)"
+            } else {
+                statusMessage = "Unknown error"
             }
-            if let data = response.result.value {
-                let json = JSON(data)
-                if json["rtCode"] == 0 {
-                    successCallBack(json)
-                } else {
-                    errorCallBack(json["rtCode"].rawValue as! Int, "")
+            
+            errorCallBack(statusCode, statusMessage)
+            return
+            case .success(_):
+                print("successful")
+            }
+            
+             if let data = response.value {
+                 let json = JSON(data)
+                 print("json is is is \(json)")
+                 if json["rtCode"] == 0 {
+                     successCallBack(json)
+                 } else {
+                     errorCallBack(json["rtCode"].rawValue as! Int, "")
                 }
             }
         }
-        
     }
-    
+            
     //MARK: - callHttpUrl
     /// Creates a `DataRequest` using the default `SessionManager` to retrieve the contents of the specified `url`,
     /// `method`, `parameters`, `encoding` and `headers`.
@@ -1138,13 +1164,15 @@ public class GuardianService{
         print("method => \(method)")
         print("encodingMethod => \(encodingMethod)")
         print("headers => \(String(describing: headers))")
-        
-        Alamofire.request(url, method: method, parameters: params, encoding: encodingMethod, headers: headers).responseJSON { response in
-            guard response.result.isSuccess else {
-                var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
-                var statusMessage : String
+
+        //AF.request(url, method: method, parameters: params, encoding: encodingMethod, headers: headers).responseJSON { (response) in
+        AF.request(url, method: method, parameters: params, encoding: encodingMethod, headers: headers).responseDecodable{(response : DataResponse<JSON, AFError>) in
+            switch response.result {
+            case .failure(_):
+            var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
+            var statusMessage : String
                 
-                if let error = response.result.error as? AFError {
+                if let error = response.error {
                     statusCode = error._code // statusCode Private
                     
                     switch error {
@@ -1167,14 +1195,39 @@ public class GuardianService{
                         case .unacceptableStatusCode(let code):
                             statusMessage = "Response status code was unacceptable: \(code)"
                             statusCode = code
+                        case .customValidationFailed(error: let error):
+                            statusMessage = "Custom Validation Failed: \(error)"
                         }
                     case .responseSerializationFailed(let reason):
                         statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
                         statusMessage = "Failure Reason"
-                    // statusCode = 3840 ???? maybe..
+                    case .createUploadableFailed(error: _):
+                        print("create Uploadable Failed")
+                    case .createURLRequestFailed(error: _):
+                        print("create URLRequest Failed")
+                    case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                        print("downloaded FileMove Failed")
+                    case .explicitlyCancelled:
+                        print("explicitly Cancelled")
+                    case .parameterEncoderFailed(reason: _):
+                        print("parameter Encoder Failed")
+                    case .requestAdaptationFailed(error: _):
+                        print("request Adaption Failed")
+                    case .requestRetryFailed(retryError: _, originalError: _):
+                        print("request Retry Failed")
+                    case .serverTrustEvaluationFailed(reason: _):
+                        print("server TrustEvaluation failed")
+                    case .sessionDeinitialized:
+                        print("session Deinitialized")
+                    case .sessionInvalidated(error: _):
+                        print("session Invalidated")
+                    case .sessionTaskFailed(error: _):
+                        print("session Task Failed")
+                    case .urlRequestValidationFailed(reason: _):
+                        print("urlRequest Validation Failed")
                     }
                     statusMessage = "Underlying error"
-                } else if let error = response.result.error as? URLError {
+                } else if let error = response.error{
                     statusMessage = "URLError occurred, error: \(error)"
                     
                 } else {
@@ -1183,16 +1236,16 @@ public class GuardianService{
                 
                 errorCallBack(statusCode, statusMessage)
                 return
+            case .success(_):
+                print("successful")
             }
-            if let data = response.result.value {
+            if let data = response.value {
                 let json = JSON(data)
                 successCallBack(json)
             }
         }
-        
     }
     
-    //MARK: - callHttpGet
     private func callHttpGet(params: Dictionary<String,Any>,
                              api: String,
                              successCallBack : @escaping(JSON) -> Void,
@@ -1201,22 +1254,24 @@ public class GuardianService{
         let url = Domain.apiDomain + api
         print("callHttpGet url => \(url)")
         
-        Alamofire.request(url,method: .get ,parameters: params)
-            .responseJSON{ response in
-                guard response.result.isSuccess else {
-                    var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
-                    var statusMessage : String
-                    if let error = response.result.error as? AFError {
-                        statusCode = error._code // statusCode private
+        //AF.request(url,method: .get ,parameters: params).responseJSON{ (response)in
+        AF.request(url, method: .get, parameters: params).responseDecodable{(response : DataResponse<JSON, AFError>) in
+                switch response.result {
+                case .failure(_):
+                var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
+                var statusMessage : String
+                    
+                    if let error = response.error {
+                        statusCode = error._code // statusCode Private
                         switch error {
                         case .invalidURL(let url):
-                            statusMessage = "Invalid URL"
+                            statusMessage = "Invalid URL :\(url)"
                         case .parameterEncodingFailed(let reason):
-                            statusMessage = "Parameter encoding failed"
+                            statusMessage = "Parameter encoding failed: \(reason)"
                         case .multipartEncodingFailed(let reason):
-                            statusMessage = "Multipart encoding failed"
+                            statusMessage = "Multipart encoding failed: \(reason)"
                         case .responseValidationFailed(let reason):
-                            statusMessage = "Response validation failed"
+                            statusMessage = "Response validation failed: \(reason)"
                             statusMessage = "Failure Reason"
                             switch reason {
                             case .dataFileNil, .dataFileReadFailed:
@@ -1228,32 +1283,57 @@ public class GuardianService{
                             case .unacceptableStatusCode(let code):
                                 statusMessage = "Response status code was unacceptable: \(code)"
                                 statusCode = code
+                            case .customValidationFailed(error: let error):
+                                statusMessage = "Custom Validation Failed: \(error)"
                             }
                         case .responseSerializationFailed(let reason):
-                            statusMessage = "Response serialization failed: \(error.localizedDescription)"
+                            statusMessage = "Response serialization failed: \(reason)"
                             statusMessage = "Failure Reason"
-                        // statusCode = 3840 ???? maybe..
+                        case .createUploadableFailed(error: _):
+                            print("create Uploadable Failed")
+                        case .createURLRequestFailed(error: _):
+                            print("create URLRequest Failed")
+                        case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                            print("downloaded FileMove Failed")
+                        case .explicitlyCancelled:
+                            print("explicitly Cancelled")
+                        case .parameterEncoderFailed(reason: _):
+                            print("parameter Encoder Failed")
+                        case .requestAdaptationFailed(error: _):
+                            print("request Adaption Failed")
+                        case .requestRetryFailed(retryError: _, originalError: _):
+                            print("request Retry Failed")
+                        case .serverTrustEvaluationFailed(reason: _):
+                            print("server TrustEvaluation failed")
+                        case .sessionDeinitialized:
+                            print("session Deinitialized")
+                        case .sessionInvalidated(error: _):
+                            print("session Invalidated")
+                        case .sessionTaskFailed(error: _):
+                            print("session Task Failed")
+                        case .urlRequestValidationFailed(reason: _):
+                            print("urlRequest Validation Failed")
                         }
-                        //                        statusMessage = "Underlying error: \(error.underlyingError)"
                         statusMessage = "Underlying error"
-                    } else if let error = response.result.error as? URLError {
-                        //                        statusMessage = "URLError occurred: \(error)"
+                    } else if let error = response.error{
                         statusMessage = url
+                        print(error)
                     } else {
-                        //                        statusMessage = "Unknown error: \(response.result.error)"
                         statusMessage = "Unknown error"
                     }
                     
                     errorCallBack(statusCode, statusMessage)
                     return
+                case .success(_):
+                    print("successful")
                 }
                 
-                if let data = response.result.value {
+                if let data = response.value {
                     let json = JSON(data)
                     successCallBack(json)
                 }
             }
-    }
+        }
     
     //MARK: - callHttpPost
     private func callHttpPost(params: Dictionary<String,Any>,
@@ -1264,22 +1344,24 @@ public class GuardianService{
         let url = Domain.apiDomain + api
         print("callHttpPost url => \(url)")
         
-        Alamofire.request(url,method: .post ,parameters: params, encoding: JSONEncoding.default)
-            .responseJSON{ response in
-                guard response.result.isSuccess else {
+        //AF.request(url,method: .post ,parameters: params, encoding: JSONEncoding.default).responseJSON{ (response) in
+        AF.request(url, method: .post, parameters: params, encoding: JSONEncoding.default).responseDecodable{(response : DataResponse<JSON, AFError>) in
+                    switch response.result {
+                    case .failure(_):
                     var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
                     var statusMessage : String
-                    if let error = response.result.error as? AFError {
-                        statusCode = error._code // statusCode private
+                        
+                        if let error = response.error {
+                            statusCode = error._code // statusCode Private
                         switch error {
                         case .invalidURL(let url):
-                            statusMessage = "Invalid URL"
+                            statusMessage = "Invalid URL :\(url)"
                         case .parameterEncodingFailed(let reason):
-                            statusMessage = "Parameter encoding failed"
+                            statusMessage = "Parameter encoding failed :\(reason)"
                         case .multipartEncodingFailed(let reason):
-                            statusMessage = "Multipart encoding failed"
+                            statusMessage = "Multipart encoding failed :\(reason)"
                         case .responseValidationFailed(let reason):
-                            statusMessage = "Response validation failed"
+                            statusMessage = "Response validation failed :\(reason)"
                             statusMessage = "Failure Reason"
                             switch reason {
                             case .dataFileNil, .dataFileReadFailed:
@@ -1291,33 +1373,60 @@ public class GuardianService{
                             case .unacceptableStatusCode(let code):
                                 statusMessage = "Response status code was unacceptable: \(code)"
                                 statusCode = code
+                            case .customValidationFailed(error: let error):
+                                statusMessage = "Custom validation failed: \(error)"
                             }
                         case .responseSerializationFailed(let reason):
-                            statusMessage = "Response serialization failed: \(error.localizedDescription)"
+                            statusMessage = "Response serialization failed: \(reason)"
                             statusMessage = "Failure Reason"
                         // statusCode = 3840 ???? maybe..
+                        case .createUploadableFailed(error: _):
+                            print("create Uploadable Failed")
+                        case .createURLRequestFailed(error: _):
+                            print("create URLRequest Failed")
+                        case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                            print("downloaded FileMove Failed")
+                        case .explicitlyCancelled:
+                            print("explicitly Cancelled")
+                        case .parameterEncoderFailed(reason: _):
+                            print("parameter Encoder Failed")
+                        case .requestAdaptationFailed(error: _):
+                            print("request Adaption Failed")
+                        case .requestRetryFailed(retryError: _, originalError: _):
+                            print("request Retry Failed")
+                        case .serverTrustEvaluationFailed(reason: _):
+                            print("server TrustEvaluation failed")
+                        case .sessionDeinitialized:
+                            print("session Deinitialized")
+                        case .sessionInvalidated(error: _):
+                            print("session Invalidated")
+                        case .sessionTaskFailed(error: _):
+                            print("session Task Failed")
+                        case .urlRequestValidationFailed(reason: _):
+                            print("urlRequest Validation Failed")
+
                         }
-                        //                        statusMessage = "Underlying error: \(error.underlyingError)"
-                        statusMessage = "Underlying error"
-                    } else if let error = response.result.error as? URLError {
-                        //                        statusMessage = "URLError occurred: \(error)"
+                            statusMessage = "Underlying error"
+                        } else if let error = response.error{
                         statusMessage = "URLError occurred"
+                            print(error)
                     } else {
-                        //                        statusMessage = "Unknown error: \(response.result.error)"
                         statusMessage = "Unknown error"
                     }
                     
                     errorCallBack(statusCode, statusMessage)
                     return
-                }
+                    case .success(_):
+                        print("successful")
+                    }
                 
-                if let data = response.result.value {
+                if let data = response.value {
                     let json = JSON(data)
                     successCallBack(json)
+                    print("json check is \(json)")
                 }
             }
-        
-    }
+        }
     
     //MARK: - callHttpPut
     private func callHttpPut(params: Dictionary<String,Any>,
@@ -1328,22 +1437,24 @@ public class GuardianService{
         let url = Domain.apiDomain + api
         print("callHttpPut url => \(url)")
         
-        Alamofire.request(url,method: .put ,parameters: params, encoding: JSONEncoding.default)
-            .responseJSON{ response in
-                guard response.result.isSuccess else {
-                    var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
-                    var statusMessage : String
-                    if let error = response.result.error as? AFError {
-                        statusCode = error._code // statusCode private
+        //AF.request(url,method: .put ,parameters: params, encoding: JSONEncoding.default).responseJSON{ (response) in
+        AF.request(url, method: .put, parameters: params, encoding: JSONEncoding.default).responseDecodable{(response : DataResponse<JSON, AFError>) in
+                switch response.result {
+                case .failure(_):
+                var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
+                var statusMessage : String
+                    
+                    if let error = response.error {
+                        statusCode = error._code // statusCode Private
                         switch error {
                         case .invalidURL(let url):
-                            statusMessage = "Invalid URL"
+                            statusMessage = "Invalid URL:\(url)"
                         case .parameterEncodingFailed(let reason):
-                            statusMessage = "Parameter encoding failed"
+                            statusMessage = "Parameter encoding failed :\(reason)"
                         case .multipartEncodingFailed(let reason):
-                            statusMessage = "Multipart encoding failed"
+                            statusMessage = "Multipart encoding failed :\(reason)"
                         case .responseValidationFailed(let reason):
-                            statusMessage = "Response validation failed"
+                            statusMessage = "Response validation failed :\(reason)"
                             statusMessage = "Failure Reason"
                             switch reason {
                             case .dataFileNil, .dataFileReadFailed:
@@ -1355,27 +1466,53 @@ public class GuardianService{
                             case .unacceptableStatusCode(let code):
                                 statusMessage = "Response status code was unacceptable: \(code)"
                                 statusCode = code
+                            case .customValidationFailed(error: let error):
+                                statusMessage = "Custom validation failed: \(error)"
                             }
                         case .responseSerializationFailed(let reason):
-                            statusMessage = "Response serialization failed: \(error.localizedDescription)"
+                            statusMessage = "Response serialization failed: \(reason)"
                             statusMessage = "Failure Reason"
-                        // statusCode = 3840 ???? maybe..
+
+                        case .createUploadableFailed(error: _):
+                            print("create Uploadable Failed")
+                        case .createURLRequestFailed(error: _):
+                            print("create URLRequest Failed")
+                        case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                            print("downloaded FileMove Failed")
+                        case .explicitlyCancelled:
+                            print("explicitly Cancelled")
+                        case .parameterEncoderFailed(reason: _):
+                            print("parameter Encoder Failed")
+                        case .requestAdaptationFailed(error: _):
+                            print("request Adaption Failed")
+                        case .requestRetryFailed(retryError: _, originalError: _):
+                            print("request Retry Failed")
+                        case .serverTrustEvaluationFailed(reason: _):
+                            print("server TrustEvaluation failed")
+                        case .sessionDeinitialized:
+                            print("session Deinitialized")
+                        case .sessionInvalidated(error: _):
+                            print("session Invalidated")
+                        case .sessionTaskFailed(error: _):
+                            print("session Task Failed")
+                        case .urlRequestValidationFailed(reason: _):
+                            print("urlRequest Validation Failed")
                         }
-                        //                        statusMessage = "Underlying error: \(error.underlyingError)"
                         statusMessage = "Underlying error"
-                    } else if let error = response.result.error as? URLError {
-                        //                        statusMessage = "URLError occurred: \(error)"
+                    } else if let error = response.error{
                         statusMessage = "URLError occurred"
+                        print(error)
                     } else {
-                        //                        statusMessage = "Unknown error: \(response.result.error)"
                         statusMessage = "Unknown error"
                     }
                     
                     errorCallBack(statusCode, statusMessage)
                     return
+                case .success(_):
+                    print("successful")
                 }
                 
-                if let data = response.result.value {
+                if let data = response.value {
                     let json = JSON(data)
                     if json["rtCode"] == 0 {
                         successCallBack(json)
@@ -1395,22 +1532,25 @@ public class GuardianService{
         let url = Domain.apiDomain + api
         print("callHttpDelete url => \(url)")
         
-        Alamofire.request(url,method: .delete ,parameters: params, encoding: JSONEncoding.default)
-            .responseJSON{ response in
-                guard response.result.isSuccess else {
+        //AF.request(url,method: .delete ,parameters: params, encoding: JSONEncoding.default).responseJSON{ (response) in
+        AF.request(url, method: .delete, parameters: params, encoding: JSONEncoding.default).responseDecodable{(response: DataResponse<JSON,AFError>) in 
+                    switch response.result {
+                    case .failure(_):
                     var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
                     var statusMessage : String
-                    if let error = response.result.error as? AFError {
-                        statusCode = error._code // statusCode private
+                        
+                        if let error = response.error {
+                            statusCode = error._code // statusCode Private
+        
                         switch error {
                         case .invalidURL(let url):
-                            statusMessage = "Invalid URL"
+                            statusMessage = "Invalid URL :\(url)"
                         case .parameterEncodingFailed(let reason):
-                            statusMessage = "Parameter encoding failed"
+                            statusMessage = "Parameter encoding failed :\(reason)"
                         case .multipartEncodingFailed(let reason):
-                            statusMessage = "Multipart encoding failed"
+                            statusMessage = "Multipart encoding failed :\(reason)"
                         case .responseValidationFailed(let reason):
-                            statusMessage = "Response validation failed"
+                            statusMessage = "Response validation failed :\(reason)"
                             statusMessage = "Failure Reason"
                             switch reason {
                             case .dataFileNil, .dataFileReadFailed:
@@ -1422,27 +1562,52 @@ public class GuardianService{
                             case .unacceptableStatusCode(let code):
                                 statusMessage = "Response status code was unacceptable: \(code)"
                                 statusCode = code
+                            case .customValidationFailed(error: let error):
+                                statusMessage = "Custom Validation failed :\(error)"
                             }
                         case .responseSerializationFailed(let reason):
-                            statusMessage = "Response serialization failed: \(error.localizedDescription)"
+                            statusMessage = "Response serialization failed: \(reason)"
                             statusMessage = "Failure Reason"
-                        // statusCode = 3840 ???? maybe..
+                        case .createUploadableFailed(error: _):
+                            print("create Uploadable Failed")
+                        case .createURLRequestFailed(error: _):
+                            print("create URLRequest Failed")
+                        case .downloadedFileMoveFailed(error: _, source: _, destination: _):
+                            print("downloaded FileMove Failed")
+                        case .explicitlyCancelled:
+                            print("explicitly Cancelled")
+                        case .parameterEncoderFailed(reason: _):
+                            print("parameter Encoder Failed")
+                        case .requestAdaptationFailed(error: _):
+                            print("request Adaption Failed")
+                        case .requestRetryFailed(retryError: _, originalError: _):
+                            print("request Retry Failed")
+                        case .serverTrustEvaluationFailed(reason: _):
+                            print("server TrustEvaluation failed")
+                        case .sessionDeinitialized:
+                            print("session Deinitialized")
+                        case .sessionInvalidated(error: _):
+                            print("session Invalidated")
+                        case .sessionTaskFailed(error: _):
+                            print("session Task Failed")
+                        case .urlRequestValidationFailed(reason: _):
+                            print("urlRequest Validation Failed")
                         }
-                        //                        statusMessage = "Underlying error: \(error.underlyingError)"
                         statusMessage = "Underlying error"
-                    } else if let error = response.result.error as? URLError {
-                        //                        statusMessage = "URLError occurred: \(error)"
+                    } else if let error = response.error{
                         statusMessage = "URLError occurred"
+                        print(error)
                     } else {
-                        //                        statusMessage = "Unknown error: \(response.result.error)"
                         statusMessage = "Unknown error"
                     }
                     
                     errorCallBack(statusCode, statusMessage)
                     return
-                }
+                    case .success(_):
+                        print("successful")
+                    }
                 
-                if let data = response.result.value {
+                if let data = response.value {
                     let json = JSON(data)
                     successCallBack(json)
                 }
@@ -1628,7 +1793,6 @@ public class GuardianService{
             var _gpsLat : String = "gpsLat \(Date().currentTimeMillis())"
             var _gpsLng : String = "gpsLng \(Date().currentTimeMillis())"
             
-            
             _proximity = nilCheck(optional: encryptAES256(value:_proximity,seckey: securityKey))
             _light = nilCheck(optional: encryptAES256(value:_light,seckey: securityKey))
             _magnetic = nilCheck(optional: encryptAES256(value:_magnetic,seckey: securityKey))
@@ -1642,7 +1806,6 @@ public class GuardianService{
             _gyroscope = nilCheck(optional: encryptAES256(value:_gyroscope,seckey: securityKey))
             _gpsLat = nilCheck(optional: encryptAES256(value:_gpsLat,seckey: securityKey))
             _gpsLng = nilCheck(optional: encryptAES256(value:_gpsLng,seckey: securityKey))
-            
             
             let params = [
                 "phoneNum":nilCheck(optional: phoneNum),
@@ -1683,38 +1846,37 @@ public class GuardianService{
             return "Error audio"
         }
     }
-    
-}
+} //class DeviceInfoService 끝
 
-public func encryptAES256(value: String ,seckey: String) -> String {
-    do {
-        var seckeyCustom : String
-        if seckey.count >= 31 {
-            seckeyCustom = seckey
-        } else {
-            seckeyCustom = seckey + "FNSVALUEfnsvalueFNSVALUEfnsvalue"
+    public func encryptAES256(value: String ,seckey: String) -> String {
+        do {
+            var seckeyCustom : String
+            if seckey.count >= 31 {
+                seckeyCustom = seckey
+            } else {
+                seckeyCustom = seckey + "FNSVALUEfnsvalueFNSVALUEfnsvalue"
+            }
+            
+            let idx1 = seckeyCustom.index(seckeyCustom.startIndex, offsetBy: 31)
+            let idx2 = seckeyCustom.index(seckeyCustom.startIndex, offsetBy: 15)
+            
+            let skey = String(seckeyCustom[...idx1])
+            let siv = String(seckeyCustom[...idx2])
+            
+            let key : [UInt8] = Array(skey.utf8)
+            let iv : [UInt8] = Array(siv.utf8)
+            let aes = try AES(key: key, blockMode: CBC(iv:iv), padding: .pkcs5)
+            let enc = try aes.encrypt(Array(value.utf8))
+            
+            return enc.toBase64()
+        } catch {
+            return "error"
         }
-        
-        let idx1 = seckeyCustom.index(seckeyCustom.startIndex, offsetBy: 31)
-        let idx2 = seckeyCustom.index(seckeyCustom.startIndex, offsetBy: 15)
-        
-        let skey = String(seckeyCustom[...idx1])
-        let siv = String(seckeyCustom[...idx2])
-        
-        let key : [UInt8] = Array(skey.utf8)
-        let iv : [UInt8] = Array(siv.utf8)
-        let aes = try AES(key: key, blockMode: CBC(iv:iv), padding: .pkcs5)
-        let enc = try aes.encrypt(Array(value.utf8))
-        
-        return enc.toBase64() ?? "base64 error"
-    } catch {
-        return "error"
     }
-}
 
-extension Date {
-    func currentTimeMillis() -> Int64 {
-        return Int64(self.timeIntervalSince1970 * 1000)
+    extension Date {
+        func currentTimeMillis() -> Int64 {
+            return Int64(self.timeIntervalSince1970 * 1000)
+        }
     }
-}
 

@@ -34,6 +34,8 @@ open class BiometricService{
                 break
             case .none:
                 break
+            @unknown default:
+                print("unknown default")
             }
         } else {
             switch error! {
@@ -166,7 +168,6 @@ open class BiometricService{
         if(initCode != .AUTH_SUCCESS) {
             onFailed(initCode, getLocalizationMessage(rtCode : initCode))
         } else {
-            do {
                 let context = LAContext()
                 context.localizedFallbackTitle = ""
 //                context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: strBioType, reply:{(success, error) in
@@ -212,13 +213,12 @@ open class BiometricService{
                                 onSuccess(RtCode.AUTH_SUCCESS, "", self.getBiometricTypeList())
                             }
                         }
+                    }else{
+                        onFailed(RtCode.BIOMETRIC_ERROR, "")
                     }
                 }
-            } catch {
-                onFailed(RtCode.BIOMETRIC_ERROR, "")
             }
         }
-    }
     
     public func resetBiometric(onSuccess: @escaping(RtCode, String, Array<[String:String]>)-> Void, onFailed: @escaping(RtCode, String)-> Void) {
         let initCode = initBiometric()
@@ -297,7 +297,7 @@ open class BiometricService{
     }
     
     private func getLocalizationMessage(rtCode : RtCode) -> String {
-        return LocalizationMessage.sharedInstance.getLocalization(code: rtCode.rawValue) as? String ?? ""
+        return LocalizationMessage.sharedInstance.getLocalization(code: rtCode.rawValue) ?? ""
     }
     
     private func hasRegisterBiometric() -> Bool {

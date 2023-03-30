@@ -66,12 +66,12 @@ public class StompSocketService : StompClientLibDelegate {
         
         if dataMap["clientKey"] != nil {
             let clientKey : String = dataMap["clientKey"]!.addingPercentEncoding(withAllowedCharacters: escapingCharacterSet)!
-            if let qr = dataMap["qrId"] {
-                let qrId = qr.addingPercentEncoding(withAllowedCharacters: escapingCharacterSet)!
-                result = "\(replaceUrl)/ws/v3/app/qr/websocket?qrId=\(qrId)"
-            } else {
+//            if let qr = dataMap["qrId"] {
+//                let qrId = qr.addingPercentEncoding(withAllowedCharacters: escapingCharacterSet)!
+//                result = "\(replaceUrl)/ws/v3/app/qr/websocket?qrId=\(qrId)"
+//            } else {
                 result = "\(replaceUrl)/ws/v3/app/websocket?clientKey=\(clientKey)&deviceId=\(deviceId)&channelKey=\(channelKey)&userKey=\(userKey)"
-            }
+//            }
         } else {
             let os : String = dataMap["os"]!.addingPercentEncoding(withAllowedCharacters: escapingCharacterSet)!
             let packageName : String = dataMap["packageName"]!.addingPercentEncoding(withAllowedCharacters: escapingCharacterSet)!

@@ -19,10 +19,10 @@ public class PasscodeService {
     public func createKeychainItem() -> Bool {
          let stringData = "string data"
          let theData = stringData.data(using: .utf8)
-         let accessControl = SecAccessControlCreateWithFlags(kCFAllocatorDefault, kSecAttrAccessibleAlways, .devicePasscode, nil)
+         let accessControl = SecAccessControlCreateWithFlags(kCFAllocatorDefault, kSecAttrAccessibleAfterFirstUnlock, .devicePasscode, nil)
          let query = [
               kSecClass as String : kSecClassGenericPassword as String,
-              kSecAttrAccessControl as String : accessControl,
+              kSecAttrAccessControl as String : accessControl as Any,
               kSecAttrAccount as String : "myAccount",
               kSecAttrService as String : "myService",
               kSecValueData as String : theData!
@@ -47,7 +47,7 @@ public class PasscodeService {
                        kSecClass as String : kSecClassGenericPassword as String,
                        kSecAttrAccount as String : "myAccount",
                        kSecAttrService as String : "myService",
-                    kSecReturnData as String : kCFBooleanTrue,
+                       kSecReturnData as String : kCFBooleanTrue as Any,
                        kSecMatchLimit as String : kSecMatchLimitOne,
                     kSecUseOperationPrompt as String : reason
                   ] as NSDictionary
@@ -59,9 +59,6 @@ public class PasscodeService {
                   }
              }
              return success
-        
-        
-        //
         
 //        let secAccessControlObject: SecAccessControl = SecAccessControlCreateWithFlags(
 //            kCFAllocatorDefault,
