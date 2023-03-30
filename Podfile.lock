@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (4.9.1)
+  - Alamofire (5.6.4)
   - CryptoSwift (1.3.2)
   - DeviceKit (5.0.0)
   - SocketRocket (0.6.0)
@@ -10,7 +10,7 @@ PODS:
   - SwiftyJSON (5.0.1)
 
 DEPENDENCIES:
-  - Alamofire (~> 4.4)
+  - Alamofire (~> 5.5)
   - CryptoSwift (= 1.3.2)
   - DeviceKit
   - StompClientLib
@@ -28,7 +28,7 @@ SPEC REPOS:
     - SwiftyJSON
 
 SPEC CHECKSUMS:
-  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  Alamofire: 4e95d97098eacb88856099c4fc79b526a299e48c
   CryptoSwift: 093499be1a94b0cae36e6c26b70870668cb56060
   DeviceKit: 0fd016a2cb67aca17c33dc23171cac270131eb88
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
@@ -36,6 +36,6 @@ SPEC CHECKSUMS:
   SwiftOTP: 572fb5601add61e93534cf6644ef236d65b4aae8
   SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
 
-PODFILE CHECKSUM: ca75c4fdd12f2129c96520881490ac6da20cc807
+PODFILE CHECKSUM: dd3801468e14aaa0816be060d35aeb115aa56441
 
 COCOAPODS: 1.12.0

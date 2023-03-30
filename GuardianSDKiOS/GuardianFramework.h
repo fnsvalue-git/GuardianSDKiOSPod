@@ -6,7 +6,7 @@
 //  Copyright © 2019 fns_mac_pro. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+//#import <UIKit/UIKit.h>
 
 //! Project version number for GuardianFramework.
 FOUNDATION_EXPORT double GuardianFrameworkVersionNumber;

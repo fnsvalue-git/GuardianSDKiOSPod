@@ -980,109 +980,13 @@ class GuardianAPI {
         
         //AF.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseJSON { (response) in
         // AF 5.0.0
-//        AF.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseDecodable {(response: DataResponse<JSON, AFError>) in
-//            switch response.result {
-//            case .failure(_):
-//            var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
-//            var statusMessage : String
-//
-//                if let error = response.error {
-//                    statusCode = error._code // statusCode Private
-//
-//                    switch error {
-//                    case .invalidURL(let url):
-//                        statusMessage = "Invalid URL, url: \(url)"
-//                    case .parameterEncodingFailed(let reason):
-//                        statusMessage = "Parameter encoding failed, reason: \(reason)"
-//                    case .multipartEncodingFailed(let reason):
-//                        statusMessage = "Multipart encoding failed, reason: \(reason)"
-//                    case .responseValidationFailed(let reason):
-//                        statusMessage = "Response validation failed, reason: \(reason)"
-//                        //                        statusMessage = "Failure Reason"
-//                        switch reason {
-//                        case .dataFileNil, .dataFileReadFailed:
-//                            statusMessage = "Downloaded file could not be read"
-//                        case .missingContentType(let acceptableContentTypes):
-//                            statusMessage = "Content Type Missing: \(acceptableContentTypes)"
-//                        case .unacceptableContentType(let acceptableContentTypes, let responseContentType):
-//                            statusMessage = "Response content type: \(responseContentType) was unacceptable: \(acceptableContentTypes)"
-//                        case .unacceptableStatusCode(let code):
-//                            statusMessage = "Response status code was unacceptable: \(code)"
-//                            statusCode = code
-//                        case .customValidationFailed(error: let error):
-//                            statusMessage = "Custom validation failed: \(error)"
-//                        }
-//                    case .responseSerializationFailed(let reason):
-//                        statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
-//                        statusMessage = "Failure Reason"
-//                        // statusCode = 3840 ???? maybe..
-//                    case .createUploadableFailed(error: let error):
-//                        print(error)
-//                    case .createURLRequestFailed(error: let error):
-//                        print(error)
-//
-//                    case .downloadedFileMoveFailed(error: let error, source: let source, destination: let destination):
-//                        print("error is \(error) and source is \(source) and destination is \(destination)")
-//
-//                    case .explicitlyCancelled:
-//                        print(error)
-//
-//                    case .parameterEncoderFailed(reason: let reason):
-//                        print(reason)
-//
-//                    case .requestAdaptationFailed(error: let error):
-//                        print(error)
-//
-//                    case .requestRetryFailed(retryError: let retryError, originalError: let originalError):
-//                        print("retryError is \(retryError) and originalError is \(originalError)")
-//
-//                    case .serverTrustEvaluationFailed(reason: let reason):
-//                        print(reason)
-//
-//                    case .sessionDeinitialized:
-//                        print(error)
-//
-//                    case .sessionInvalidated(error: let error):
-//                        print(error as Any)
-//
-//                    case .sessionTaskFailed(error: let error):
-//                        print(error)
-//
-//                    case .urlRequestValidationFailed(reason: let reason):
-//                        print(reason)
-//
-//                    }
-//                    statusMessage = "Underlying error"
-//                } else if let error = response.error{
-//                    statusMessage = "URLError occurred, error: \(error)"
-//
-//                } else {
-//                    statusMessage = "Unknown error"
-//                }
-//
-//                errorCallBack(statusCode, statusMessage)
-//                return
-//            case .success(_):
-//                print("successful")
-//            }
-//            if let data = response.value {
-//                let json = JSON(data)
-//                if json["rtCode"] == 0 {
-//                    successCallBack(json)
-//                } else {
-//                    print("Error RTCode : \(json["rtCode"])")
-//                    errorCallBack(json["rtCode"].rawValue as! Int, "")
-//                }
-//            }
-//        }
-        
-        // AF 4.0.0
-        Alamofire.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseJSON { response in
-            guard response.result.isSuccess else {
-                var statusCode : Int! = response.response?.statusCode ?? 2020
-                var statusMessage : String
+        AF.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseDecodable {(response: DataResponse<JSON, AFError>) in
+            switch response.result {
+            case .failure(_):
+            var statusCode : Int! = response.response?.statusCode ?? RtCode.API_ERROR.rawValue
+            var statusMessage : String
 
-                if let error = response.result.error as? AFError {
+                if let error = response.error {
                     statusCode = error._code // statusCode Private
 
                     switch error {
@@ -1105,14 +1009,51 @@ class GuardianAPI {
                         case .unacceptableStatusCode(let code):
                             statusMessage = "Response status code was unacceptable: \(code)"
                             statusCode = code
+                        case .customValidationFailed(error: let error):
+                            statusMessage = "Custom validation failed: \(error)"
                         }
                     case .responseSerializationFailed(let reason):
                         statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
                         statusMessage = "Failure Reason"
                         // statusCode = 3840 ???? maybe..
+                    case .createUploadableFailed(error: let error):
+                        print(error)
+                    case .createURLRequestFailed(error: let error):
+                        print(error)
+
+                    case .downloadedFileMoveFailed(error: let error, source: let source, destination: let destination):
+                        print("error is \(error) and source is \(source) and destination is \(destination)")
+
+                    case .explicitlyCancelled:
+                        print(error)
+
+                    case .parameterEncoderFailed(reason: let reason):
+                        print(reason)
+
+                    case .requestAdaptationFailed(error: let error):
+                        print(error)
+
+                    case .requestRetryFailed(retryError: let retryError, originalError: let originalError):
+                        print("retryError is \(retryError) and originalError is \(originalError)")
+
+                    case .serverTrustEvaluationFailed(reason: let reason):
+                        print(reason)
+
+                    case .sessionDeinitialized:
+                        print(error)
+
+                    case .sessionInvalidated(error: let error):
+                        print(error as Any)
+
+                    case .sessionTaskFailed(error: let error):
+                        print(error)
+
+                    case .urlRequestValidationFailed(reason: let reason):
+                        print(reason)
+
                     }
                     statusMessage = "Underlying error"
-                } else if let error = response.result.error as? URLError {
+                } else if let error = response.error{
                     statusMessage = "URLError occurred, error: \(error)"
 
                 } else {
@@ -1121,8 +1062,10 @@ class GuardianAPI {
 
                 errorCallBack(statusCode, statusMessage)
                 return
+            case .success(_):
+                print("successful")
             }
-            if let data = response.result.value {
+            if let data = response.value {
                 let json = JSON(data)
                 if json["rtCode"] == 0 {
                     successCallBack(json)
@@ -1132,61 +1075,64 @@ class GuardianAPI {
                 }
             }
         }
+        
+        // AF 4.0.0
+//        Alamofire.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseJSON { response in
+//            guard response.result.isSuccess else {
+//                var statusCode : Int! = response.response?.statusCode ?? 2020
+//                var statusMessage : String
+//
+//                if let error = response.result.error as? AFError {
+//                    statusCode = error._code // statusCode Private
+//
+//                    switch error {
+//                    case .invalidURL(let url):
+//                        statusMessage = "Invalid URL, url: \(url)"
+//                    case .parameterEncodingFailed(let reason):
+//                        statusMessage = "Parameter encoding failed, reason: \(reason)"
+//                    case .multipartEncodingFailed(let reason):
+//                        statusMessage = "Multipart encoding failed, reason: \(reason)"
+//                    case .responseValidationFailed(let reason):
+//                        statusMessage = "Response validation failed, reason: \(reason)"
+//                        //                        statusMessage = "Failure Reason"
+//                        switch reason {
+//                        case .dataFileNil, .dataFileReadFailed:
+//                            statusMessage = "Downloaded file could not be read"
+//                        case .missingContentType(let acceptableContentTypes):
+//                            statusMessage = "Content Type Missing: \(acceptableContentTypes)"
+//                        case .unacceptableContentType(let acceptableContentTypes, let responseContentType):
+//                            statusMessage = "Response content type: \(responseContentType) was unacceptable: \(acceptableContentTypes)"
+//                        case .unacceptableStatusCode(let code):
+//                            statusMessage = "Response status code was unacceptable: \(code)"
+//                            statusCode = code
+//                        }
+//                    case .responseSerializationFailed(let reason):
+//                        statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
+//                        statusMessage = "Failure Reason"
+//                        // statusCode = 3840 ???? maybe..
+//                    }
+//                    statusMessage = "Underlying error"
+//                } else if let error = response.result.error as? URLError {
+//                    statusMessage = "URLError occurred, error: \(error)"
+//
+//                } else {
+//                    statusMessage = "Unknown error"
+//                }
+//
+//                errorCallBack(statusCode, statusMessage)
+//                return
+//            }
+//            if let data = response.result.value {
+//                let json = JSON(data)
+//                if json["rtCode"] == 0 {
+//                    successCallBack(json)
+//                } else {
+//                    print("Error RTCode : \(json["rtCode"])")
+//                    errorCallBack(json["rtCode"].rawValue as! Int, "")
+//                }
+//            }
+//        }
     }
 }
 
-        //        Alamofire.request(url, method: method, parameters: params, encoding: encodingMethod, headers: apiHeaders).responseJSON { response in
-        //            guard response.result.isSuccess else {
-        //                var statusCode : Int! = response.response?.statusCode ?? 2020
-        //                var statusMessage : String
-        //
-        //                if let error = response.result.error as? AFError {
-        //                    statusCode = error._code // statusCode Private
-        //
-        //                    switch error {
-        //                    case .invalidURL(let url):
-        //                        statusMessage = "Invalid URL, url: \(url)"
-        //                    case .parameterEncodingFailed(let reason):
-        //                        statusMessage = "Parameter encoding failed, reason: \(reason)"
-        //                    case .multipartEncodingFailed(let reason):
-        //                        statusMessage = "Multipart encoding failed, reason: \(reason)"
-        //                    case .responseValidationFailed(let reason):
-        //                        statusMessage = "Response validation failed, reason: \(reason)"
-        //                        //                        statusMessage = "Failure Reason"
-        //                        switch reason {
-        //                        case .dataFileNil, .dataFileReadFailed:
-        //                            statusMessage = "Downloaded file could not be read"
-        //                        case .missingContentType(let acceptableContentTypes):
-        //                            statusMessage = "Content Type Missing: \(acceptableContentTypes)"
-        //                        case .unacceptableContentType(let acceptableContentTypes, let responseContentType):
-        //                            statusMessage = "Response content type: \(responseContentType) was unacceptable: \(acceptableContentTypes)"
-        //                        case .unacceptableStatusCode(let code):
-        //                            statusMessage = "Response status code was unacceptable: \(code)"
-        //                            statusCode = code
-        //                        }
-        //                    case .responseSerializationFailed(let reason):
-        //                        statusMessage = "Response serialization failed: \(error.localizedDescription), reason: \(reason)"
-        //                        statusMessage = "Failure Reason"
-        //                        // statusCode = 3840 ???? maybe..
-        //                    }
-        //                    statusMessage = "Underlying error"
-        //                } else if let error = response.result.error as? URLError {
-        //                    statusMessage = "URLError occurred, error: \(error)"
-        //
-        //                } else {
-        //                    statusMessage = "Unknown error"
-        //                }
-        //
-        //                errorCallBack(statusCode, statusMessage)
-        //                return
-        //            }
-        //            if let data = response.result.value {
-        //                let json = JSON(data)
-        //                if json["rtCode"] == 0 {
-        //                    successCallBack(json)
-        //                } else {
-        //                    print("Error RTCode : \(json["rtCode"])")
-        //                    errorCallBack(json["rtCode"].rawValue as! Int, "")
-        //                }
-        //            }
-        //        }
+      

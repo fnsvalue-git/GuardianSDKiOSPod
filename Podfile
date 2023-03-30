@@ -6,7 +6,7 @@ target 'GuardianSDKiOS' do
   use_frameworks!
 
   # Pods for GuardianSDKiOS
-  pod 'Alamofire', '~> 4.4'
+  pod 'Alamofire', '~> 5.5'
   pod 'CryptoSwift', '1.3.2'
   pod 'SwiftyJSON'
   pod 'StompClientLib'
