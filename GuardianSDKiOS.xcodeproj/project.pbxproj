@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		23ACF438233322B800FA4246 /* GuardianFramework.h in Headers */ = {isa = PBXBuildFile; fileRef = 23ACF436233322B800FA4246 /* GuardianFramework.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		603D3AAA712E92EFDD1E304D /* Pods_GuardianSDKiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3D8129049519DCC403A1AAF /* Pods_GuardianSDKiOS.framework */; };
-		8C0C41A729D408CD002BD944 /* GuardianAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41A629D408CD002BD944 /* GuardianAPI.swift */; };
 		8C0C41B029D40CA8002BD944 /* AuthHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41AD29D40CA8002BD944 /* AuthHistory.swift */; };
 		8C0C41B129D40CA8002BD944 /* TranslationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41AE29D40CA8002BD944 /* TranslationModel.swift */; };
 		8C0C41B229D40CA8002BD944 /* PushNotificationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41AF29D40CA8002BD944 /* PushNotificationModel.swift */; };
@@ -24,6 +23,7 @@
 		8C0C41C629D40DBB002BD944 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41C529D40DBB002BD944 /* Client.swift */; };
 		8C0C41C829D40DD8002BD944 /* Agreement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41C729D40DD8002BD944 /* Agreement.swift */; };
 		8C0C41CA29D40DEE002BD944 /* Notice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0C41C929D40DEE002BD944 /* Notice.swift */; };
+		8CDDAA2929D54F2600980011 /* GuardianAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CDDAA2829D54F2600980011 /* GuardianAPI.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,7 +44,6 @@
 		23ACF436233322B800FA4246 /* GuardianFramework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GuardianFramework.h; sourceTree = "<group>"; };
 		23ACF437233322B800FA4246 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		31AAEDB45F2DFF1B74078CAB /* Pods-GuardianSDKiOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GuardianSDKiOS.release.xcconfig"; path = "Target Support Files/Pods-GuardianSDKiOS/Pods-GuardianSDKiOS.release.xcconfig"; sourceTree = "<group>"; };
-		8C0C41A629D408CD002BD944 /* GuardianAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GuardianAPI.swift; sourceTree = "<group>"; };
 		8C0C41AD29D40CA8002BD944 /* AuthHistory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthHistory.swift; sourceTree = "<group>"; };
 		8C0C41AE29D40CA8002BD944 /* TranslationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslationModel.swift; sourceTree = "<group>"; };
 		8C0C41AF29D40CA8002BD944 /* PushNotificationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationModel.swift; sourceTree = "<group>"; };
@@ -59,6 +58,7 @@
 		8C0C41C529D40DBB002BD944 /* Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
 		8C0C41C729D40DD8002BD944 /* Agreement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Agreement.swift; sourceTree = "<group>"; };
 		8C0C41C929D40DEE002BD944 /* Notice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notice.swift; sourceTree = "<group>"; };
+		8CDDAA2829D54F2600980011 /* GuardianAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GuardianAPI.swift; sourceTree = "<group>"; };
 		C8BD45E2259FDCBB28F14B1E /* Pods-GuardianSDKiOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GuardianSDKiOS.debug.xcconfig"; path = "Target Support Files/Pods-GuardianSDKiOS/Pods-GuardianSDKiOS.debug.xcconfig"; sourceTree = "<group>"; };
 		E3D8129049519DCC403A1AAF /* Pods_GuardianSDKiOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GuardianSDKiOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -100,7 +100,6 @@
 				8C0C41BA29D40D1A002BD944 /* Service */,
 				8C0C41B329D40CC6002BD944 /* Utility */,
 				8C0C41AC29D40C81002BD944 /* Model */,
-				8C0C41A629D408CD002BD944 /* GuardianAPI.swift */,
 				23ACF436233322B800FA4246 /* GuardianFramework.h */,
 				23ACF437233322B800FA4246 /* Info.plist */,
 			);
@@ -146,6 +145,7 @@
 				8C0C41BE29D40D35002BD944 /* KeyChainService.swift */,
 				8C0C41BC29D40D35002BD944 /* PasscodeService.swift */,
 				8C0C41BD29D40D35002BD944 /* StompSocketService.swift */,
+				8CDDAA2829D54F2600980011 /* GuardianAPI.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -275,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8C0C41CA29D40DEE002BD944 /* Notice.swift in Sources */,
+				8CDDAA2929D54F2600980011 /* GuardianAPI.swift in Sources */,
 				8C0C41C229D40D35002BD944 /* StompSocketService.swift in Sources */,
 				8C0C41B029D40CA8002BD944 /* AuthHistory.swift in Sources */,
 				8C0C41B929D40D14002BD944 /* Totp.swift in Sources */,
@@ -285,7 +286,6 @@
 				8C0C41C629D40DBB002BD944 /* Client.swift in Sources */,
 				8C0C41B129D40CA8002BD944 /* TranslationModel.swift in Sources */,
 				8C0C41B729D40D14002BD944 /* Jailbreak.swift in Sources */,
-				8C0C41A729D408CD002BD944 /* GuardianAPI.swift in Sources */,
 				8C0C41C029D40D35002BD944 /* BiometricService.swift in Sources */,
 				8C0C41B829D40D14002BD944 /* LocalizationMessage.swift in Sources */,
 				8C0C41B229D40CA8002BD944 /* PushNotificationModel.swift in Sources */,
