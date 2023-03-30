@@ -993,6 +993,47 @@ public class GuardianService{
         }
     }
     
+    //MARK: - isDuplcatedEmailOrPhoneNumber
+    /// To check if the user has input an existing email or phone number
+    /// - Parameters:
+    ///   - verifyType: is a `String`, which has 2 cases. `CMMDUP001` for email and `CMMDUP002` for sms/phone
+    ///   - verifyData: is a `String`, which could be your `email` or your `phone number` depending on the `verifyType`
+    ///   - onSuccess: will escape when unique
+    ///   - onFailed: will escape when duplicated
+    public func isDuplicatedEmailOrPhoneNumber(verifyType: String, verifyData: String, onSuccess: @escaping(JSON)->Void, onFailed: @escaping(Int, String)->Void) {
+        let apiUrl = "/users/common/duplicate-check"
+        var params = Dictionary<String, String>()
+        params["verifyType"] = verifyType
+        params["verifyData"] = verifyData
+        
+        self.callHttpMethod(params: params, api: apiUrl) { (data: JSON) in
+            onSuccess(data)
+        }
+        errorCallBack: { (errorCode, errorMsg) in
+            onFailed(RtCode.API_ERROR.rawValue, errorMsg)
+            }
+        }
+
+    //MARK: - isDuplicateUserKey
+    /// To check if the user has input an existing `userKey`
+    /// - Parameters:
+    ///   - userKey: FNSV
+    ///   - onSuccess: will escape when unique
+    ///   - onFailed: will escape when duplicated
+    public func isDuplicatedUserKey(userKey: String, onSuccess: @escaping(JSON)->Void, onFailed: @escaping(Int, String)->Void) {
+        let apiUrl = "/idcheck"
+        var params = Dictionary<String, String>()
+        params["userKey"] = userKey
+        
+        self.callHttpMethod(params: params, api: apiUrl) { (data: JSON) in
+            onSuccess(data)
+        }
+        errorCallBack: { (errorCode, errorMsg) in
+            onFailed(RtCode.API_ERROR.rawValue, errorMsg)
+            }
+        }
+    
+    
     //MARK: - callHttpMethod
     /// Creates a `DataRequest` using the default `SessionManager` to retrieve the contents of the specified `url`,
     /// `method`, `parameters`, `encoding` and `headers`.
