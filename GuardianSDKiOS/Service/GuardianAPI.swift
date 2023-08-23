@@ -368,7 +368,7 @@ public class GuardianAPI {
     ///   - authPlatform: is used for statistic purposes to see where the user has proceed the authentication and is `"CMMAPF002"` (Mobile App) by default
     ///   - onSuccess: will escape when success
     ///   - onFailed: will escape when failed
-    public public func requestAuth(qrId: String? = nil,
+    public func requestAuth(qrId: String? = nil,
                             clientKey: String,
                             authPlatform: String,// = "CMMAPF002",
                             onSuccess: @escaping(RtCode, String)->Void,
