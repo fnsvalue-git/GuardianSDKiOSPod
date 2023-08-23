@@ -714,7 +714,7 @@ public class GuardianService{
                 params["os"] = "CMMDOS002"
                 params["osVersion"] = getOSVersion()
                 params["appVersion"] = getAppVersion()
-                params["deiceManufacturer"] = "apple"
+                params["deviceManufacturer"] = "apple"
                 params["deviceName"] = Device.current.description
                 
                 self.callHttpMethod(params: params, api: apiUrl, method: .post) { (response: JSON) in
@@ -768,7 +768,7 @@ public class GuardianService{
                 params["os"] = "CMMDOS002"
                 params["osVersion"] = getOSVersion()
                 params["appVersion"] = getAppVersion()
-                params["deiceManufacturer"] = "apple"
+                params["deviceManufacturer"] = "apple"
                 params["deviceName"] = Device.current.description
                 
                 self.callHttpMethod(params: params, api: apiUrl, method: .put) { (response: JSON) in
@@ -823,7 +823,7 @@ public class GuardianService{
                 params["os"] = "CMMDOS002"
                 params["osVersion"] = getOSVersion()
                 params["appVersion"] = getAppVersion()
-                params["deiceManufacturer"] = "apple"
+                params["deviceManufacturer"] = "apple"
                 params["deviceName"] = Device.current.description
                 
                 self.callHttpMethod(params: params, api: apiUrl, method: .post) { (data: JSON) in

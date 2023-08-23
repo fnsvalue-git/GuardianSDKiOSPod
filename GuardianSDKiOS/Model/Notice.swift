@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NoticePatchType : String {
+public enum NoticePatchType : String {
     case web  = "CMMPTN001"
     case Android = "CMMPTN002"
     case IOS = "CMMPTN003"
@@ -15,7 +15,7 @@ enum NoticePatchType : String {
     case API = "CMMPTN005"
 }
 
-struct Notice {
+public struct Notice {
     let title : String
     let patchType : String
     let regDt : String

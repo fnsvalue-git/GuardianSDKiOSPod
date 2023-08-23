@@ -7,14 +7,14 @@
 
 import Foundation
 
-enum AuthHistoryStatus : String {
+public enum AuthHistoryStatus : String {
     case success = "CMMASC001"
     case failed = "CMMASC002"
     case canceled = "CMMASC003"
     case timeout = "CMMASC004"
 }
 
-struct AuthHistory {
+public struct AuthHistory {
     let userKey : String
     let content : String
     let connectIp : String

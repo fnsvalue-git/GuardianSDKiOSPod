@@ -9,12 +9,12 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 
-struct ClientIdentity {
+public struct ClientIdentity {
     let clientName : String
     let clientKey : String
 }
 
-class GuardianAPI {
+public class GuardianAPI {
 //    public let server = K.server
 //    public let suffix = K.suffix
 //    public let baseUrl = K.server + K.suffix

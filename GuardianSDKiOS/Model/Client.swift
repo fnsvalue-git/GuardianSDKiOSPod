@@ -8,7 +8,7 @@
 import Foundation
 
 
-struct Client {
+public struct Client {
     let userStatus : IntegratingUserStatus
     let interlock : Bool
     let clientName : String
@@ -19,7 +19,7 @@ struct Client {
     let verifyType : String?
 }
 
-enum IntegratingUserStatus : String {
+public enum IntegratingUserStatus : String {
     case normal = "CMMMST001"
     case wait = "CMMMST002"
     case block = "CMMMST003"

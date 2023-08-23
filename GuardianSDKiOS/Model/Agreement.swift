@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Agreement {
+public struct Agreement {
     let seq: Int
     let title: String
     let type: AgreementType
@@ -16,7 +16,7 @@ struct Agreement {
     let clientKey: String
 }
 
-struct AgreementHTML {
+public struct AgreementHTML {
     let userStatus : String
     let title : String
     let seq : Int
@@ -30,7 +30,7 @@ struct AgreementHTML {
     let type : AgreementType
 }
 
-enum AgreementType : String {
+public enum AgreementType : String {
     case CMMAGR001 = "CMMAGR001"
     case CMMAGR002 = "CMMAGR002"
     case CMMAGR003 = "CMMAGR003"
