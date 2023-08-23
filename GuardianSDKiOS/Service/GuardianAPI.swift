@@ -19,7 +19,7 @@ public class GuardianAPI {
 //    public let suffix = K.suffix
 //    public let baseUrl = K.server + K.suffix
     
-    static let sharedInstance = GuardianAPI()
+    static public let sharedInstance = GuardianAPI()
     
     private(set) var baseUrl: String = ""
     public func setBaseUrl(_ url: String) {
@@ -91,7 +91,7 @@ public class GuardianAPI {
     /// - Parameters:
     ///   - onSuccess: Will escape an `rtCode` `rawValue` and an `Array` of `ClientIdentity(clientName: String, clientKey: String)`
     ///   - onFailed: Will escape an `errCode` and an `errMsg`
-    func getClients(onSuccess: @escaping (Int, [ClientIdentity])->Void, onFailed: @escaping(Int, String)->Void) {
+    public func getClients(onSuccess: @escaping (Int, [ClientIdentity])->Void, onFailed: @escaping(Int, String)->Void) {
         let apiUrl = "/clients"
         let params = Dictionary<String,String>()
         
@@ -119,7 +119,7 @@ public class GuardianAPI {
     ///   - userKey: `String` of userKey
     ///   - onSuccess: Will escape a `JSON` form of data
     ///   - onFailed: Will escape `errorCode, errMsg` if failed
-    func unregisterDevice(userKey: String, onSuccess: @escaping (JSON)->Void, onFailed: @escaping(Int, String)->Void) {
+    public func unregisterDevice(userKey: String, onSuccess: @escaping (JSON)->Void, onFailed: @escaping(Int, String)->Void) {
         let apiUrl = "/users/\(userKey)/device"
         
         apiCall(params: Dictionary<String,Any>(), api: apiUrl, method: .delete) { data in
@@ -165,7 +165,7 @@ public class GuardianAPI {
     ///   - verifyData: is a `String`, which could be your `email` or your `phone number` depending on the `verifyType`
     ///   - onSuccess: escape when successful
     ///   - onFailed: escape when failed
-    func sendOTPInRegisterDevice(userKey: String, name: String, verifyType: String, verifyData: String, masterClientKey: String, onSuccess: @escaping (Int, Dictionary<String, Any>)->Void, onFailed: @escaping (Int)->Void) {
+    public func sendOTPInRegisterDevice(userKey: String, name: String, verifyType: String, verifyData: String, masterClientKey: String, onSuccess: @escaping (Int, Dictionary<String, Any>)->Void, onFailed: @escaping (Int)->Void) {
         
         let apiUrl = "/users/send-otp"
         
@@ -288,7 +288,7 @@ public class GuardianAPI {
     ///   - authNum: 123456
     ///   - onSuccess: Will escape the result of the OTP verification as `Bool`. If false, user input the wrong OTP number. Otherwise, it means the user has input the correct OTP number.
     ///   - onFailed: will escape `error, errorMsg`
-    func verifyOTPByEmail(email: String, phoneNum: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
+    public func verifyOTPByEmail(email: String, phoneNum: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
         
         let apiUrl = "/mail/verify"
         
@@ -330,7 +330,7 @@ public class GuardianAPI {
     ///   - authNum: 123456
     ///   - onSuccess: Will escape the result of the OTP verification as `Bool`. If false, user input the wrong OTP number. Otherwise, it means the user has input the correct OTP number.
     ///   - onFailed: will escape `error, errorMsg`
-    func verifyOtpBySms(phoneNum: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
+    public func verifyOtpBySms(phoneNum: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
         
         let apiUrl = "/sms/verify"
         
@@ -368,7 +368,7 @@ public class GuardianAPI {
     ///   - authPlatform: is used for statistic purposes to see where the user has proceed the authentication and is `"CMMAPF002"` (Mobile App) by default
     ///   - onSuccess: will escape when success
     ///   - onFailed: will escape when failed
-    public func requestAuth(qrId: String? = nil,
+    public public func requestAuth(qrId: String? = nil,
                             clientKey: String,
                             authPlatform: String,// = "CMMAPF002",
                             onSuccess: @escaping(RtCode, String)->Void,
@@ -848,7 +848,7 @@ public class GuardianAPI {
     ///   - seq: The sequence number representing a certain agreement
     ///   - onSuccess: will escape with `AgreementHTML` object
     ///   - onFailed: will escape when failed
-    func getAgreementHTML(clientKey: String,
+    public func getAgreementHTML(clientKey: String,
                           seq: Int,
                           onSuccess: @escaping(Int, AgreementHTML)->Void,
                           onFailed: @escaping(Int, String)->Void) {
