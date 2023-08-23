@@ -288,7 +288,7 @@ public class GuardianAPI {
     ///   - authNum: 123456
     ///   - onSuccess: Will escape the result of the OTP verification as `Bool`. If false, user input the wrong OTP number. Otherwise, it means the user has input the correct OTP number.
     ///   - onFailed: will escape `error, errorMsg`
-    public func verifyOTPByEmail(email: String, phoneNum: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
+    public func verifyOTPByEmail(email: String, authNum: String, masterClientKey: String, onSuccess: @escaping(Int, Bool, Dictionary<String, Any>)->Void, onFailed: @escaping(Int, String)->Void){
         
         let apiUrl = "/mail/verify"
         
@@ -296,7 +296,7 @@ public class GuardianAPI {
         params["clientKey"] = masterClientKey
 //        params["clientKey"] = K.MasterClientKey
         params["email"] = email
-        params["phoneNum"] = phoneNum
+//        params["phoneNum"] = phoneNum
         params["authNum"] = authNum
         
         print("Param => \(params)")
